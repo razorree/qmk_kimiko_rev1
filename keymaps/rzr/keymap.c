@@ -33,17 +33,38 @@ const char* const PROGMEM LAYER_NAMES[] = { "Grpht", "QWERT" };
 
 //////////////////////////////////////////////////
 // Tap Dance declarations
-enum {
-    TD_MINS_PLUS,
-};
+// enum {
+//     TD_MINS_PLUS,
+// };
 
-// Tap Dance definitions
-tap_dance_action_t tap_dance_actions[] = {
-    // Tap once for MINUS, twice for PLUS
-    [TD_MINS_PLUS] = ACTION_TAP_DANCE_DOUBLE(KC_MINS, KC_PLUS),
-};
+// // Tap Dance definitions
+// tap_dance_action_t tap_dance_actions[] = {
+//     // Tap once for MINUS, twice for PLUS
+//     [TD_MINS_PLUS] = ACTION_TAP_DANCE_DOUBLE(KC_MINS, KC_PLUS),
+// };
 
 /////////////////////////////////////////////////
+
+///////////////////// SM_TD /////////////////////////////////////////////////
+
+enum custom_keycodes {
+    SMTD_KEYCODES_BEGIN = SAFE_RANGE,
+    CKC_R, // reads as C(ustom) + KC_A, but you may give any name here
+    CKC_T,
+    CKC_S,
+    CKC_H,
+    CKC_A,
+    CKC_E,
+    SMTD_KEYCODES_END,
+};
+
+#include "sm_td.h"
+
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
@@ -85,10 +106,10 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
  [_GRAPHITE] = LAYOUT(
     KC_ESC,  KC_1,   KC_2,         KC_3,        KC_4,    KC_5,                        KC_6,     KC_7,        KC_8,      KC_9,       KC_0,   KC_GRV,
-    KC_TAB,  KC_B,   KC_L,         KC_D,        KC_W,    KC_Z,                        KC_QUOT,  KC_F,        KC_O,      KC_U,       KC_J,   TD(TD_MINS_PLUS),
-    KC_LSFT, KC_N,LALT_T(KC_R), LCTL_T(KC_T),LSFT_T(KC_S),KC_G,                       KC_Y, RSFT_T(KC_H), RCTL_T(KC_A), RALT_T(KC_E),KC_I,  KC_SLSH,
-    KC_LCTL, KC_Q,    KC_X,    KC_M,            KC_C,    KC_V,    KC_LBRC,  KC_RBRC,  KC_K,     KC_P,        KC_COMM,   KC_DOT,     KC_SCLN,KC_EQL,
-                      KC_LCTL, KC_LGUI,         KC_LALT, RAISE,   KC_SPC,   KC_ENT,   LOWER,    KC_BSPC,     KC_DEL,    KC_RALT
+    KC_TAB,  KC_B,   KC_L,         KC_D,        KC_W,    KC_Z,                        KC_QUOT,  KC_F,        KC_O,      KC_U,       KC_J,   KC_MINS, //TD(TD_MINS_PLUS),
+    KC_LSFT, KC_N,   CKC_R,        CKC_T,       CKC_S,   KC_G,                        KC_Y,     CKC_H,       CKC_A,     CKC_E,      KC_I,   KC_SLSH,
+    KC_LCTL, KC_Q,    KC_X,        KC_M,        KC_C,    KC_V,    KC_LBRC,  KC_RBRC,  KC_K,     KC_P,        KC_COMM,   KC_DOT,     KC_SCLN,KC_EQL,
+                      KC_LCTL,     KC_LGUI,     KC_LALT, RAISE,   KC_SPC,   KC_ENT,   LOWER,    KC_BSPC,     KC_DEL,    KC_RALT
 ),
 
 /* QWERTY
@@ -107,7 +128,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
  [_QWERTY] = LAYOUT(
     KC_ESC,   KC_1,   KC_2,    KC_3,    KC_4,    KC_5,                        KC_6,    KC_7,    KC_8,    KC_9,    KC_0,    KC_GRV,
-    KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                        KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    TD(TD_MINS_PLUS),
+    KC_TAB,   KC_Q,   KC_W,    KC_E,    KC_R,    KC_T,                        KC_Y,    KC_U,    KC_I,    KC_O,    KC_P,    KC_MINS, //TD(TD_MINS_PLUS),
     KC_LSFT,  KC_A,   LALT_T(KC_S),    LCTL_T(KC_D),    LSFT_T(KC_F),    KC_G,                        KC_H,    RSFT_T(KC_J),    RCTL_T(KC_K),    RALT_T(KC_L),    KC_SCLN, KC_QUOT,
     KC_LCTL,  KC_Z,   KC_X,    KC_C,    KC_V,    KC_B,    KC_LBRC,  KC_RBRC,  KC_N,    KC_M,    KC_COMM, KC_DOT,  KC_SLSH, RSFT_T(KC_ENT),
                       KC_LCTL, KC_LGUI, KC_LALT, RAISE,   KC_SPC,   KC_ENT,  LOWER,   KC_BSPC, KC_RGUI, KC_RALT
@@ -201,3 +222,26 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][NUM_DIRECTIONS] = {
     [_ADJUST] =   { ENCODER_CCW_CW(UG_PREV, UG_NEXT),        ENCODER_CCW_CW(UG_SATD, UG_SATU) },
 };
 #endif // ENCODER_MAP_ENABLE
+
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+    if (!process_smtd(keycode, record)) {
+        return false;
+    }
+
+    // your rest code here
+    return true;
+}
+
+void on_smtd_action(uint16_t keycode, smtd_action action, uint8_t tap_count) {
+    switch (keycode) {
+        SMTD_MT(CKC_R, KC_R, KC_LEFT_ALT)
+        SMTD_MT(CKC_T, KC_T, KC_LEFT_CTRL)
+        SMTD_MT(CKC_S, KC_S, KC_LSFT)
+        SMTD_MT(CKC_H, KC_H, KC_LSFT)
+        SMTD_MT(CKC_A, KC_A, KC_RCTL)
+        SMTD_MT(CKC_E, KC_E, KC_RALT)
+    }
+    //return SMTD_RESOLUTION_UNHANDLED;
+
+}
